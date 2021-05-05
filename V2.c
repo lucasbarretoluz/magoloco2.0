@@ -3,6 +3,7 @@
 #include <conio.h> 
 #include <windows.h>
 
+#include "raylib/src/raylib.h"
 
 #define L 30
 #define C 60
