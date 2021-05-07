@@ -158,7 +158,7 @@ void movimenta()
    meuMago.posicao.x += meuMago.valor_x;
    meuMago.posicao.y += meuMago.valor_y;
 
-   mapa[meuMago.posicao.y][meuMago.posicao.x] = '\3';
+   mapa[meuMago.posicao.y][meuMago.posicao.x] = 'J';
 
    //---------para deixar um clic por movimento a
    // meuMago.valor_x = 0;
