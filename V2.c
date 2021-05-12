@@ -3,8 +3,6 @@
 #include <conio.h>
 #include <windows.h>
 
-//#include "raylib/src/raylib.h"
-
 #define L 30
 #define C 60
 
@@ -21,7 +19,7 @@ struct Mago
    struct cordenada posicao;
    int valor_x;
    int valor_y;
-   int lives;
+   int vidas;
 };
 
 struct Mago meuMago =
@@ -122,7 +120,15 @@ void entrada_teclado()
          meuMago.valor_y = -1; //cima
          meuMago.valor_x = 0;
          break;
+      case 87:                 //comando 'W'
+         meuMago.valor_y = -1; //cima
+         meuMago.valor_x = 0;
+         break;
       case 115:                //comando 's'
+         meuMago.valor_y = +1; //baixo
+         meuMago.valor_x = 0;
+         break;
+      case 83:                 //comando 'S'
          meuMago.valor_y = +1; //baixo
          meuMago.valor_x = 0;
          break;
@@ -130,7 +136,15 @@ void entrada_teclado()
          meuMago.valor_x = -1; //esquerda
          meuMago.valor_y = 0;
          break;
+      case 65:                 //comando'A'
+         meuMago.valor_x = -1; //esquerda
+         meuMago.valor_y = 0;
+         break;
       case 100:                //comando 'd'
+         meuMago.valor_x = +1; //direita
+         meuMago.valor_y = 0;
+         break;
+      case 68:                 //comando 'D'
          meuMago.valor_x = +1; //direita
          meuMago.valor_y = 0;
          break;
@@ -153,6 +167,14 @@ void movimenta()
 
       meuMago.valor_x = 0;
       meuMago.valor_y = 0;
+   }
+   if ((mapa[ny][nx] == 'Z') || (mapa[ny][nx] == 'T') || (mapa[ny][nx] == 'X'))
+   {
+      meuMago.valor_x = 0;
+      meuMago.valor_y = 0;
+   }
+   if (mapa[ny][nx] == 'G')
+   {
    }
 
    meuMago.posicao.x += meuMago.valor_x;
@@ -177,6 +199,7 @@ void imprimir_mapa()
       }
       printf("\n");
    }
+   printf("VIDAS: %d", 2);
 }
 
 //----------------------
