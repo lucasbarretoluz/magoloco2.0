@@ -4,6 +4,8 @@
 
 #define L 30
 #define C 60
+#define false 0
+#define true 1
 
 //---------------
 
@@ -21,7 +23,23 @@ struct Mago
    int vidas;
    int pontos;
    int nivel;
+   boolean aura; //controle da arma secreta
 };
+
+// struct Arma
+// {
+//    struct cordenada posicao;
+//    bool ativo;
+// };
+
+// struct Arma arma =
+//     {
+//         {
+//             .x = 0,
+//             .y = 0,
+//         },
+//         // ativo = false,
+// };
 
 struct Mago meuMago =
     {
@@ -34,6 +52,7 @@ struct Mago meuMago =
         .vidas = 3,
         .pontos = 0,
         .nivel = 1,
+        .aura = false,
 
 };
 
@@ -45,6 +64,7 @@ void movimenta();
 void imprimir_mapa();
 void cursor();
 void hidecursor();
+void arma_secreta();
 
 //-------------MAIN
 int main()
@@ -98,7 +118,7 @@ char mapa[L][C] =
 //------------------Entrada do teclado
 void entrada_teclado()
 {
-   char ch1, ch2;
+   char ch1;
    if (_kbhit())
    {
       ch1 = _getch();
@@ -154,6 +174,9 @@ void entrada_teclado()
          meuMago.valor_x = +1; //direita
          meuMago.valor_y = 0;
          break;
+      case 102: //Letra f aura
+         meuMago.aura = true;
+         break;
       }
    }
 }
@@ -166,10 +189,9 @@ void movimenta()
 
    int nx = meuMago.valor_x + meuMago.posicao.x;
    int ny = meuMago.valor_y + meuMago.posicao.y;
-
+   int i, x;
    if (mapa[ny][nx] == '#')
    {
-
       meuMago.valor_x = 0;
       meuMago.valor_y = 0;
    }
@@ -184,14 +206,32 @@ void movimenta()
       meuMago.pontos += 100;
    }
 
+   if (meuMago.aura == true)
+   {
+      for (i = 0; i <= 2; i++)
+      {
+         for (x = 0; x <= 2; x++)
+         {
+            mapa[meuMago.posicao.y - i][meuMago.posicao.x - x] = 'O';
+            mapa[meuMago.posicao.y - i][meuMago.posicao.x + x] = 'O';
+            mapa[meuMago.posicao.y + i][meuMago.posicao.x - x] = 'O';
+            mapa[meuMago.posicao.y + i][meuMago.posicao.x + x] = 'O';
+         }
+      }
+   }
+
    meuMago.posicao.x += meuMago.valor_x;
    meuMago.posicao.y += meuMago.valor_y;
 
    mapa[meuMago.posicao.y][meuMago.posicao.x] = 'J';
 
    //---------para deixar um clic por movimento a
-   // meuMago.valor_x = 0;
-   // meuMago.valor_y = 0;
+   meuMago.valor_x = 0;
+   meuMago.valor_y = 0;
+}
+//----------------------
+void arma_secreta()
+{
 }
 
 //----------------------
