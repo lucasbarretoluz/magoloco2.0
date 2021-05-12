@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <conio.h>
 #include <windows.h>
@@ -19,8 +20,14 @@ struct Mago
    int valor_x;
    int valor_y;
    int vidas;
-   int pontos;
-   int nivel;
+};
+
+struct Tiro
+{
+   struct cordenada posicao;
+//    int valor_x;
+//    int valor_y;
+   bool ativo;
 };
 
 struct Mago meuMago =
@@ -31,10 +38,16 @@ struct Mago meuMago =
         },
         .valor_x = 0,
         .valor_y = 0,
-        .vidas = 3,
-        .pontos = 0,
-        .nivel = 1,
 
+};
+
+struct Tiro tiro =
+    {
+        {
+            .x = 0,
+            .y = 0,
+        },
+        ativo = false,
 };
 
 //------------------
@@ -45,6 +58,7 @@ void movimenta();
 void imprimir_mapa();
 void cursor();
 void hidecursor();
+void tiro(Mago personagem);
 
 //-------------MAIN
 int main()
@@ -54,7 +68,7 @@ int main()
 
    hidecursor();
 
-   while (meuMago.vidas > 0)
+   while (1)
    {
       entrada_teclado();
       movimenta();
@@ -63,8 +77,6 @@ int main()
       Sleep(1000 / 30);
       cursor(0, 0);
    }
-   system("cls");
-   printf("\n TURURU GAME OVER!");
 }
 
 //---------------------
@@ -79,7 +91,7 @@ char mapa[L][C] =
         {"#                            X              X    XXXXXXX   #"},
         {"#           X      X         X              X              #"},
         {"#           X      X         X              X              #"},
-        {"#           X      X         X      G       X              #"},
+        {"#           x      X         X              X              #"},
         {"#           X      X         X              X              #"},
         {"#           X      X         X              X              #"},
         {"#           X      X                                       #"},
@@ -103,7 +115,7 @@ void entrada_teclado()
    {
       ch1 = _getch();
 
-      switch (ch1)
+      switch (ch1) //falta adicionar valores para W S A D
       {
 
       case 72:                 //seta cima
@@ -154,6 +166,7 @@ void entrada_teclado()
          meuMago.valor_x = +1; //direita
          meuMago.valor_y = 0;
          break;
+         //default
       }
    }
 }
@@ -175,13 +188,11 @@ void movimenta()
    }
    if ((mapa[ny][nx] == 'Z') || (mapa[ny][nx] == 'T') || (mapa[ny][nx] == 'X'))
    {
-      meuMago.vidas -= 1;
       meuMago.valor_x = 0;
       meuMago.valor_y = 0;
    }
    if (mapa[ny][nx] == 'G')
    {
-      meuMago.pontos += 100;
    }
 
    meuMago.posicao.x += meuMago.valor_x;
@@ -206,7 +217,7 @@ void imprimir_mapa()
       }
       printf("\n");
    }
-   printf("\nVIDAS = %d          NIVEL = %d           PONTOS = %d", meuMago.vidas, meuMago.nivel, meuMago.pontos);
+   printf("VIDAS: %d", 2);
 }
 
 //----------------------
@@ -226,4 +237,13 @@ void hidecursor()
    info.dwSize = 100;
    info.bVisible = FALSE;
    SetConsoleCursorInfo(consoleHandle, &info);
+}
+
+void tiro(Mago personagem){
+    tiro.x = personagem.x;
+    tiro.y = personagem.y;
+    tiro.ativo = true;
+
+    for(int i=0;)
+    mapa[x][y] = 
 }
