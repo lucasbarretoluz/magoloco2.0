@@ -1,3 +1,5 @@
+/*O QUE ESTÁ SEM O 'OK' ESTÁ COM ALGUM DEFEITO*/
+
 #include <stdio.h>
 #include <conio.h>
 #include <windows.h>
@@ -9,6 +11,7 @@
 #define C 60
 #define false 0
 #define true 1
+#define NUM_MAX_MONSTROS 20
 
 //---------------
 
@@ -50,7 +53,8 @@ struct Tesouro tesouro1 =
         {
             .x = 0,
             .y = 0,
-        }};
+        },
+};
 struct Mago meuMago =
     {
         {
@@ -65,25 +69,74 @@ struct Mago meuMago =
         .aura = false,
 
 };
+struct Monstro
+{
+   struct cordenada posicao[NUM_MAX_MONSTROS];
+   int tipo[NUM_MAX_MONSTROS];
+   int vida[NUM_MAX_MONSTROS];
+   int passos[NUM_MAX_MONSTROS];
+   struct cordenada deslocamento[NUM_MAX_MONSTROS];
+   int numeroMonstros;
+};
+struct Monstro ogros =
+    {};
 
 //------------------
 
 char mapa[L][C];
-void entrada_teclado();
-void movimenta();
-void imprimir_mapa();
-void cursor();
-void hidecursor();
-int salvaJogo();
+void entrada_teclado();  //OK
+void movimenta();        //pensei em zerar as vidas dos monstros aq, quando ativar a aura.
+void imprimir_mapa();    //OK
+void cursor();           //OK
+void hidecursor();       //OK
+int salvaJogo();         //OK
+void movimentaMonstro(); //OK
+//int lerJogosalvo ();
 
 //-------------MAIN
 int main()
 {
    char opcaoMenu;
-   int teste = 0, testeSalvar = 0;
+   int teste = 0, testeSalvar = 0, cronometro = 0, i;
    tesouro1.colisao = 0;
    srand(time(NULL));
-   do //atribui as posições iniciais aleatória do tesouro
+   do //numero aleatório de monstros(OK)
+   {
+      ogros.numeroMonstros = rand() % NUM_MAX_MONSTROS;
+   } while (ogros.numeroMonstros < ((NUM_MAX_MONSTROS / 4) + meuMago.nivel));
+   for (i = 0; i < ogros.numeroMonstros; i++) // não deixa ser menor que um valor e aumenta a quantidade a cada nivel.(OK)
+   {
+      do
+      {
+         ogros.posicao[i].x = rand() % C;
+         ogros.posicao[i].y = rand() % L;
+         if ((mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'G') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == '#') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'Z') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'X') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'J') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'T')) //impede do monstro nascer em cima de algum outro objeto do mapa.
+         {
+            teste = 0;
+         }
+         else
+         {
+            do //atribui o ogros.tipo do monstro 1 para zumbi e 2 para trol.
+            {
+               ogros.tipo[i] = rand() % 3;
+            } while (ogros.tipo[i] == 0);
+            if (ogros.tipo[i] == 1) //se for zumbi.
+            {
+               ogros.vida[i] = 1;
+               mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 'Z';
+            }
+            if (ogros.tipo[i] == 2) //se for trol.
+            {
+               ogros.vida[i] = 2;
+               mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 'T';
+            }
+            teste = 1;
+         }
+      } while (teste == 0);
+      ogros.deslocamento[i].x = 1;
+      ogros.deslocamento[i].y = 1;
+   }
+   do //atribui as posições iniciais aleatória do tesouro(OK)
    {
       tesouro1.posicao.x = rand() % C;
       tesouro1.posicao.y = rand() % L;
@@ -96,7 +149,7 @@ int main()
          teste = 1;
       }
    } while (teste == 0);
-   do //atribui a posição aleatória do mago.
+   do //atribui a posição aleatória do mago.(OK)
    {
       meuMago.posicao.x = rand() % C;                                                                                                                                                                                                                                                      //atribui posição inicial x aleatória.
       meuMago.posicao.y = rand() % L;                                                                                                                                                                                                                                                      //atribui posição inicial y aleatória.
@@ -112,8 +165,8 @@ int main()
    hidecursor();
    while (sair.pressionada == 0)
    {
-      entrada_teclado();
-      if (tab.pressionada == 1) //abre o menu.
+      entrada_teclado();        //OK
+      if (tab.pressionada == 1) //abre o menu.(OK)
       {
          system("cls");
          printf("\nPara sair do jogo pressione 'Q'");
@@ -133,8 +186,51 @@ int main()
          case 78:                                              //N
             mapa[meuMago.posicao.y][meuMago.posicao.x] = 32;   //apaga o jogador de antes.
             mapa[tesouro1.posicao.y][tesouro1.posicao.x] = 32; //apaga o tesouro de antes.
-            meuMago.pontos = 0;                                //zera os pontos
-            meuMago.lives = 3;                                 //reseta as vidas.
+            for (i = 0; i < ogros.numeroMonstros; i++)
+            {
+               mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 32;
+            }
+            cronometro = 0;
+            ogros.deslocamento->x = 0;
+            ogros.deslocamento->y = 0;
+            meuMago.pontos = 0; //zera os pontos
+            meuMago.lives = 3;  //reseta as vidas.
+            do                  //numero aleatório de monstros
+            {
+               ogros.numeroMonstros = rand() % NUM_MAX_MONSTROS;
+            } while (ogros.numeroMonstros < ((NUM_MAX_MONSTROS / 4) + meuMago.nivel));
+            for (i = 0; i < ogros.numeroMonstros; i++) // não deixa ser menor que um valor e aumenta a quantidade a cada nivel.
+            {
+               do
+               {
+                  ogros.posicao[i].x = rand() % C;
+                  ogros.posicao[i].y = rand() % L;
+                  if ((mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'G') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == '#') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'Z') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'X') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'J') || (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'T')) //impede do monstro nascer em cima de algum outro objeto do mapa.
+                  {
+                     teste = 0;
+                  }
+                  else
+                  {
+                     do //atribui o ogros.tipo do monstro 1 para zumbi e 2 para trol.
+                     {
+                        ogros.tipo[i] = rand() % 3;
+                     } while (ogros.tipo[i] == 0);
+                     if (ogros.tipo[i] == 1) //se for zumbi.
+                     {
+                        ogros.vida[i] = 1;
+                        mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 'Z';
+                     }
+                     if (ogros.tipo[i] == 2) //se for trol.
+                     {
+                        ogros.vida[i] = 2;
+                        mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 'T';
+                     }
+                     teste = 1;
+                  }
+               } while (teste == 0);
+               ogros.deslocamento[i].x = 1;
+               ogros.deslocamento[i].y = 1;
+            }
             teste = 0;
             do //atribui nova posição do mago.
             {
@@ -184,6 +280,7 @@ int main()
             }
             tab.pressionada = 0;
             getchar();
+            system("cls");
             break;
             /*case 99:            //c
             case 67:            //C
@@ -199,10 +296,15 @@ int main()
          }
       }
       movimenta();
-      imprimir_mapa();
+      if (cronometro == 1) //CRIAR FUNÇÃO DE CRONOMETRO.
+      {
+         movimentaMonstro(); //OK
+         cronometro = 0;
+      }
+      imprimir_mapa(); //OK
       Sleep(1000 / 30);
       cursor(0, 0);
-      if (meuMago.lives == 0)
+      if (meuMago.lives == 0) //OK
       {
          printf("\n TURURU\nVOCE PERDEU");
          sair.pressionada = 1;
@@ -212,7 +314,7 @@ int main()
 }
 
 //---------------------
-char mapa[L][C] =
+char mapa[L][C] = //ALTERAR PARA SER O LUGAR ONDE O ARQUIVO DE MAPAS ABRIRA.
     {
         {"############################################################"},
         {"#                                                          #"},
@@ -246,7 +348,7 @@ char mapa[L][C] =
         {"############################################################"}};
 
 //------------------Entrada do teclado
-void entrada_teclado()
+void entrada_teclado() //OK
 {
    char ch1, ch2;
    if (_kbhit())
@@ -264,6 +366,7 @@ void entrada_teclado()
       case 80:                 //seta baixo
          meuMago.valor_y = +1; //baixo
          meuMago.valor_x = 0;
+         meuMago.aura = false;
          break;
       case 75:                 //seta esquerda
          meuMago.valor_x = -1; //esquerda
@@ -312,9 +415,9 @@ void entrada_teclado()
 }
 
 //---------------------
-void movimenta()
+void movimenta() //OK, por enquanto.
 {
-   int i, x;
+   int i, x, z = 0, teste = 0;
    mapa[meuMago.posicao.y][meuMago.posicao.x] = ' ';
    if (tesouro1.colisao != 1) //analisa se o jogador pegou o tesouro.
    {
@@ -361,9 +464,22 @@ void movimenta()
       {
          for (x = -2; x <= 2; x++)
          {
-            if ((mapa[ny + i][nx + x] == ' ') || (mapa[ny + i][nx + x] == 'Z'))
+            if (mapa[ny + i][nx + x] == ' ')
             {
                mapa[meuMago.posicao.y + i][meuMago.posicao.x + x] = 'O';
+            }
+            if ((mapa[ny + i][nx + x] == 'Z') || (mapa[ny + i][nx + x] == 'T'))
+            {
+               while (teste = 0)
+               {
+                  if ((ogros.posicao[z].x == (nx + x) && (ogros.posicao[z].y == (ny + i))))
+                  {
+                     ogros.vida[z] -= 1;
+                     teste = 1;
+                  }
+                  z++;
+               }
+               teste = 0;
             }
          }
       }
@@ -378,7 +494,7 @@ void movimenta()
 }
 
 //----------------------
-void imprimir_mapa()
+void imprimir_mapa() //OK
 {
    int i, j;
    for (i = 0; i < L; i++)
@@ -393,7 +509,7 @@ void imprimir_mapa()
 }
 
 //----------------------
-void cursor(int x, int y)
+void cursor(int x, int y) //OK
 {
 
    COORD coord = {x, y};
@@ -402,7 +518,7 @@ void cursor(int x, int y)
 }
 
 //---------------------
-void hidecursor()
+void hidecursor() //OK
 {
    HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
    CONSOLE_CURSOR_INFO info;
@@ -412,30 +528,118 @@ void hidecursor()
 }
 
 //---------------------
-int salvaJogo()
+void movimentaMonstro() //OK
+{
+   int sinal, i; //variavel para decidir se o deslocamento fica positivo ou negativo.
+   for (i = 0; i < ogros.numeroMonstros; i++)
+   {
+      if (ogros.vida[i] == 0)
+      {
+         ogros.deslocamento[i].x = 0;
+         ogros.deslocamento[i].y = 0;
+         ogros.passos[i] = 0;
+         ogros.tipo[i] = 0;
+         mapa[ogros.posicao[i].y][ogros.posicao[i].y] = ' ';
+      }
+      if ((ogros.passos[i] == 5) || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')) //cuida, conforme especificação, se ja deu 5 passo, ou se vai bater em algo.
+      {
+         if (ogros.tipo[i] == 1) //zumbi
+         {
+            if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] != 'X') //não muda o deslocamento se for obstaculo, pois os zumbis o atravessam.
+            {
+               do //looping para mudar os deslocamentos.
+               {
+                  ogros.deslocamento[i].x = rand() % 2;
+                  ogros.deslocamento[i].y = rand() % 2;
+                  sinal = rand() % 2;
+                  if (sinal == 0)
+                  {
+                     ogros.deslocamento[i].x = -ogros.deslocamento[i].x;
+                  }
+                  if (sinal == 1)
+                  {
+                     ogros.deslocamento[i].y = -ogros.deslocamento[i].y;
+                  }
+               } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T')); //dura até que a posição futura não colida em nada.
+               mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+               mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+            }
+            else
+            {
+               if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X') //se a posição futura for um obstaculo, ele fica invisivel enquanto esta no obstaculo.
+               {
+                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+               }
+               else if (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'X') //se a posição atual é um obstaculo ele não apaga o obstaculo apos sair.
+               {
+                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+               }
+               else //se não for nenhum dos casos anteriores ele se move normalmente.
+               {
+                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+               }
+            }
+         }
+         if (ogros.tipo[i] == 2) //trol.
+         {
+            do //looping para alterar o deslocamento do trol.
+            {
+               ogros.deslocamento[i].x = rand() % 2;
+               ogros.deslocamento[i].y = rand() % 2;
+               sinal = rand() % 2;
+               if (sinal == 0)
+               {
+                  ogros.deslocamento[i].x = -ogros.deslocamento[i].x;
+               }
+               if (sinal == 1)
+               {
+                  ogros.deslocamento[i].y = -ogros.deslocamento[i].y;
+               }
+            } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')); //continua ate que a posição futura não seja um obstaculo.
+            mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
+         }
+         if (ogros.passos[i] == 5) //se muda o deslocamento ele zera os passos com o deslocamento anterior, e inicia com o atual daquele zumbi.
+         {
+            ogros.passos[i] = 0;
+         }
+      }
+      else //se for uma posição vazia ele se move normalmente.
+      {
+         mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+         if (ogros.tipo[i] == 1) //zumbi.
+         {
+            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+         }
+         if (ogros.tipo[i] == 2) //trol.
+         {
+            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
+         }
+      }
+   }
+}
+
+//---------------------
+int salvaJogo() //OK
 {
    FILE *salvarjogo;
    int l, c, teste;
-   if (!(salvarjogo = fopen(NOMEARQSALVAMENTO, "w+")))
+   if (!(salvarjogo = fopen(NOMEARQSALVAMENTO, "w+"))) //abre o arquivo
    {
       teste = 0;
    }
    else
    {
-      for (l = 0; l <= L; l++)
+      printf("\n\nMapa:\n");
+      for (l = 0; l < L; l++)
       {
-         for (c = 0; c <= C; c++)
+         for (c = 0; c < C; c++)
          {
-            fprintf(salvarjogo, "%s\n", mapa[l]);
+            fputc(mapa[l][c], salvarjogo);
          }
+         fputs("\n", salvarjogo);
       }
-      /*for(c=0; c<=C; c++)          //salva dados dos monstros
-    {
-        fprintf(salvarjogo, "tipo=%d\n", p1->monst[c].tipo);
-        fprintf(salvarjogo, "vidasmonst=%d\n", p1->monst[c].vidas);
-        fprintf(salvarjogo, "movx=%d\n", p1->monst[c].dx);
-        fprintf(salvarjogo, "movy=%d\n", p1->monst[c].dy);
-    }*/
       fprintf(salvarjogo, "pontos=%d\n", meuMago.pontos);
       fprintf(salvarjogo, "vidas=%d\n", meuMago.lives);
       fprintf(salvarjogo, "nivel=%d\n", meuMago.nivel);
@@ -446,3 +650,37 @@ int salvaJogo()
    }
    return teste;
 }
+/*int lerJogosalvo ()
+{
+   FILE *arq;
+   char *arquivo;
+   long lSize;
+   char **mapa_lido; //ponteiro de ponteiro
+   int i;
+
+    if ((arq = fopen(NOMEARQSALVAMENTO, "r")) == NULL) //Abre o arquivo.
+        printf("Erro em abrir o arquivo txt");
+   else
+   {
+      fseek(arq, 0, SEEK_END); //Vai pro fim do arquivo.
+      lSize = ftell(arq);      //Pega o indice do fim do arquivo (Tamanho dele).
+      rewind(arq);             //Volta o ponteiro de leitura pro começo do arquivo.     
+
+      arquivo = (char *)malloc(sizeof(char) * lSize);     //Aloca memoria na variavel pra colocar o conteudo do arquivo.
+      fread(arquivo, 1, lSize, arq);          //Coloca o conteudo do arquivo na memoria.
+
+      mapa_lido = (char **)calloc(L, sizeof(char *));
+   
+      for (i = 0; i < L; i++)
+      {
+         mapa_lido[i] = (char *)calloc(C, sizeof(char));
+      }
+
+      printf("\nMapa Lido:\n");
+      for ( i = 0; i < L; i++)
+      {
+         printf("%s \n", mapa_lido[i]); 
+      }
+   }
+
+}*/
