@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define NOMEARQSALVAMENTO "jogosalvo.txt"
-#define L 30
+#define L 23
 #define C 60
 #define false 0
 #define true 1
@@ -80,7 +80,18 @@ struct Monstro
 };
 struct Monstro ogros =
     {};
-
+struct Cronometro
+{
+   float segundos;
+};
+struct Cronometro poder =
+    {
+        .segundos = 0,
+};
+struct Cronometro contagem =
+    {
+        .segundos = 0,
+};
 //------------------
 
 char mapa[L][C];
@@ -91,13 +102,15 @@ void cursor();           //OK
 void hidecursor();       //OK
 int salvaJogo();         //OK
 void movimentaMonstro(); //OK
+int lerMapa();
 //int lerJogosalvo ();
 
 //-------------MAIN
 int main()
 {
    char opcaoMenu;
-   int teste = 0, testeSalvar = 0, cronometro = 0, i;
+   int teste = 0, testeSalvar = 0, i;
+   time_t tempoInicial, tempoFinal;
    tesouro1.colisao = 0;
    srand(time(NULL));
    do //numero aleatório de monstros(OK)
@@ -165,8 +178,9 @@ int main()
    hidecursor();
    while (sair.pressionada == 0)
    {
-      entrada_teclado();        //OK
-      if (tab.pressionada == 1) //abre o menu.(OK)
+      tempoInicial = time(NULL); //atribui o tempo inicial.
+      entrada_teclado();         //OK
+      if (tab.pressionada == 1)  //abre o menu.(OK)
       {
          system("cls");
          printf("\nPara sair do jogo pressione 'Q'");
@@ -190,7 +204,8 @@ int main()
             {
                mapa[ogros.posicao[i].y][ogros.posicao[i].x] = 32;
             }
-            cronometro = 0;
+            poder.segundos = 0;
+            contagem.segundos = 0;
             ogros.deslocamento->x = 0;
             ogros.deslocamento->y = 0;
             meuMago.pontos = 0; //zera os pontos
@@ -282,24 +297,24 @@ int main()
             getchar();
             system("cls");
             break;
-            /*case 99:            //c
-            case 67:            //C
-               meuMago.nivel=carregaJogo();
-               tab.pressionada=0;
-               if(meuMago.nivel==0)
-               {
-                  printf("\nERRO AO CARREGAR ARQUIVO, OU ARQUIVO INEXISTENTE");
-               }
-               getchar();
-               system("cls");
-               break;*/
+         case 99: //c
+         case 67: //C
+            meuMago.nivel = lerMapa();
+            tab.pressionada = 0;
+            if (meuMago.nivel == 0)
+            {
+               printf("\nERRO AO CARREGAR ARQUIVO, OU ARQUIVO INEXISTENTE");
+            }
+            getchar();
+            system("cls");
+            break;
          }
       }
       movimenta();
-      if (cronometro == 1) //CRIAR FUNÇÃO DE CRONOMETRO.
+      if (contagem.segundos >= 3) //OK.
       {
          movimentaMonstro(); //OK
-         cronometro = 0;
+         contagem.segundos = 0;
       }
       imprimir_mapa(); //OK
       Sleep(1000 / 30);
@@ -309,43 +324,38 @@ int main()
          printf("\n TURURU\nVOCE PERDEU");
          sair.pressionada = 1;
       }
+      tempoFinal = time(NULL);                                 //atribui o tempo final
+      contagem.segundos += difftime(tempoFinal, tempoInicial); //soma a diferença entre os tempos de duração do while.
+      poder.segundos += difftime(tempoFinal, tempoInicial);    //soma a diferença entre os tempos de duração do while.
    }
    getchar();
 }
 
 //---------------------
 char mapa[L][C] = //ALTERAR PARA SER O LUGAR ONDE O ARQUIVO DE MAPAS ABRIRA.
-    {
-        {"############################################################"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#    XXXXXXXXXXXXXXXXXXXX    X              X              #"},
-        {"#                  X         X              X              #"},
-        {"#                            X              X              #"},
-        {"#                            X              X    XXXXXXX   #"},
-        {"#           X      X         X              X              #"},
-        {"#           X      X         X              X              #"},
-        {"#           X      X         X              X              #"},
-        {"#           X      X         X              X              #"},
-        {"#           X      X         X              X              #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"#           X      X                                       #"},
-        {"#           X      X                                       #"},
-        {"#           X      X                                       #"},
-        {"#           X      XXXXXXXXX                               #"},
-        {"#           X                                              #"},
-        {"#           X              XXXXXXXXXXXXXXXXXX           XX #"},
-        {"#                                                       X  #"},
-        {"#                                                       X  #"},
-        {"#     XXXXXXXXXXXXXXXXXXXXXXXXXX     XXXXXXXXXXXXXXXX      #"},
-        {"#                                                          #"},
-        {"#                                                          #"},
-        {"############################################################"}};
+    {{"############################################################"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#    XXXXXXXXXXXXXXXXXXXX    X              X              #"},
+     {"#                  X         X              X              #"},
+     {"#                            X              X              #"},
+     {"#                            X              X    XXXXXXX   #"},
+     {"#           X      X         X              X              #"},
+     {"#           X      X         X              X              #"},
+     {"#           X      X         X              X              #"},
+     {"#           X      X         X              X              #"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#                                                          #"},
+     {"#           X      X                                       #"},
+     {"#           X      X                                       #"},
+     {"#           X      X                                       #"},
+     {"#           X      XXXXXXXXX                               #"},
+     {"#                                                          #"},
+     {"############################################################"}};
 
 //------------------Entrada do teclado
 void entrada_teclado() //OK
@@ -404,7 +414,12 @@ void entrada_teclado() //OK
          break;
       case 70:
       case 102: //comando 'f' = poder.
-         meuMago.aura = true;
+         //meuMago.aura = true;
+         if (poder.segundos >= 5)
+         {
+            meuMago.aura = true;
+            poder.segundos = 0;
+         }
          break;
       case 9: //comando 'tab' = menu.
          tab.pressionada += 1;
@@ -457,7 +472,7 @@ void movimenta() //OK, por enquanto.
          }
       }
    }
-   if (meuMago.aura == true)
+   if (meuMago.aura == true) //arrumar
    {
 
       for (i = -2; i <= 2; i++)
@@ -470,16 +485,15 @@ void movimenta() //OK, por enquanto.
             }
             if ((mapa[ny + i][nx + x] == 'Z') || (mapa[ny + i][nx + x] == 'T'))
             {
-               while (teste = 0)
+               while (teste == 0)
                {
                   if ((ogros.posicao[z].x == (nx + x) && (ogros.posicao[z].y == (ny + i))))
                   {
-                     ogros.vida[z] -= 1;
+                     ogros.vida[z]--;
                      teste = 1;
                   }
                   z++;
                }
-               teste = 0;
             }
          }
       }
@@ -530,24 +544,46 @@ void hidecursor() //OK
 //---------------------
 void movimentaMonstro() //OK
 {
-   int sinal, i; //variavel para decidir se o deslocamento fica positivo ou negativo.
+   int sinal, i, x = 0; //variavel para decidir se o deslocamento fica positivo ou negativo.
    for (i = 0; i < ogros.numeroMonstros; i++)
    {
-      if (ogros.vida[i] == 0)
+      if (ogros.vida[i] > 0)
       {
-         ogros.deslocamento[i].x = 0;
-         ogros.deslocamento[i].y = 0;
-         ogros.passos[i] = 0;
-         ogros.tipo[i] = 0;
-         mapa[ogros.posicao[i].y][ogros.posicao[i].y] = ' ';
-      }
-      if ((ogros.passos[i] == 5) || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')) //cuida, conforme especificação, se ja deu 5 passo, ou se vai bater em algo.
-      {
-         if (ogros.tipo[i] == 1) //zumbi
+         if ((ogros.passos[i] == 5) || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')) //cuida, conforme especificação, se ja deu 5 passo, ou se vai bater em algo.
          {
-            if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] != 'X') //não muda o deslocamento se for obstaculo, pois os zumbis o atravessam.
+            if (ogros.tipo[i] == 1) //zumbi
             {
-               do //looping para mudar os deslocamentos.
+               if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] != 'X') //não muda o deslocamento se for obstaculo, pois os zumbis o atravessam.
+               {
+                  do //looping para mudar os deslocamentos.
+                  {
+                     ogros.deslocamento[i].x = rand() % 2;
+                     ogros.deslocamento[i].y = rand() % 2;
+                     sinal = rand() % 2;
+                     if (sinal == 0)
+                     {
+                        ogros.deslocamento[i].x = -ogros.deslocamento[i].x;
+                     }
+                     if (sinal == 1)
+                     {
+                        ogros.deslocamento[i].y = -ogros.deslocamento[i].y;
+                     }
+                  } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T')); //dura até que a posição futura não colida em nada.
+                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+               }
+               if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X') //se a posição futura for um obstaculo, ele fica invisivel enquanto esta no obstaculo.
+               {
+                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+               }
+               if (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'X') //se a posição atual é um obstaculo ele não apaga o obstaculo apos sair.
+               {
+                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
+               }
+            }
+            if (ogros.tipo[i] == 2) //trol.
+            {
+               do //looping para alterar o deslocamento do trol.
                {
                   ogros.deslocamento[i].x = rand() % 2;
                   ogros.deslocamento[i].y = rand() % 2;
@@ -560,63 +596,36 @@ void movimentaMonstro() //OK
                   {
                      ogros.deslocamento[i].y = -ogros.deslocamento[i].y;
                   }
-               } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T')); //dura até que a posição futura não colida em nada.
+               } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')); //continua ate que a posição futura não seja um obstaculo.
                mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+               mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
+               ogros.passos[i] = 0;
+            }
+         }
+         if ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == ' ') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'O')) //se for uma posição vazia ele se move normalmente.
+         {
+            mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
+            if (ogros.tipo[i] == 1) //zumbi.
+            {
                mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
             }
-            else
+            if (ogros.tipo[i] == 2) //trol.
             {
-               if (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X') //se a posição futura for um obstaculo, ele fica invisivel enquanto esta no obstaculo.
-               {
-                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
-               }
-               else if (mapa[ogros.posicao[i].y][ogros.posicao[i].x] == 'X') //se a posição atual é um obstaculo ele não apaga o obstaculo apos sair.
-               {
-                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
-               }
-               else //se não for nenhum dos casos anteriores ele se move normalmente.
-               {
-                  mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
-                  mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
-               }
+               mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
             }
          }
-         if (ogros.tipo[i] == 2) //trol.
-         {
-            do //looping para alterar o deslocamento do trol.
-            {
-               ogros.deslocamento[i].x = rand() % 2;
-               ogros.deslocamento[i].y = rand() % 2;
-               sinal = rand() % 2;
-               if (sinal == 0)
-               {
-                  ogros.deslocamento[i].x = -ogros.deslocamento[i].x;
-               }
-               if (sinal == 1)
-               {
-                  ogros.deslocamento[i].y = -ogros.deslocamento[i].y;
-               }
-            } while ((mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == '#') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'Z') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'T') || (mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] == 'X')); //continua ate que a posição futura não seja um obstaculo.
-            mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
-            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
-         }
-         if (ogros.passos[i] == 5) //se muda o deslocamento ele zera os passos com o deslocamento anterior, e inicia com o atual daquele zumbi.
-         {
-            ogros.passos[i] = 0;
-         }
+         ogros.posicao[i].x += ogros.deslocamento[i].x;
+         ogros.posicao[i].y += ogros.deslocamento[i].y;
       }
-      else //se for uma posição vazia ele se move normalmente.
+      else
       {
          mapa[ogros.posicao[i].y][ogros.posicao[i].x] = ' ';
-         if (ogros.tipo[i] == 1) //zumbi.
-         {
-            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'Z';
-         }
-         if (ogros.tipo[i] == 2) //trol.
-         {
-            mapa[ogros.posicao[i].y + ogros.deslocamento[i].y][ogros.posicao[i].x + ogros.deslocamento[i].x] = 'T';
-         }
+         x++;
       }
+   }
+   if (x == ogros.numeroMonstros)
+   {
+      meuMago.nivel += 1;
    }
 }
 
@@ -650,37 +659,36 @@ int salvaJogo() //OK
    }
    return teste;
 }
-/*int lerJogosalvo ()
-{
-   FILE *arq;
-   char *arquivo;
-   long lSize;
-   char **mapa_lido; //ponteiro de ponteiro
-   int i;
 
-    if ((arq = fopen(NOMEARQSALVAMENTO, "r")) == NULL) //Abre o arquivo.
-        printf("Erro em abrir o arquivo txt");
+//---------------------
+int lerMapa()
+{
+   int retorno, l, c, x, y;
+   FILE *mapas;
+   if (!(mapas = fopen(NOMEARQSALVAMENTO, "r")))
+   {
+      retorno = 0;
+   }
    else
    {
-      fseek(arq, 0, SEEK_END); //Vai pro fim do arquivo.
-      lSize = ftell(arq);      //Pega o indice do fim do arquivo (Tamanho dele).
-      rewind(arq);             //Volta o ponteiro de leitura pro começo do arquivo.     
-
-      arquivo = (char *)malloc(sizeof(char) * lSize);     //Aloca memoria na variavel pra colocar o conteudo do arquivo.
-      fread(arquivo, 1, lSize, arq);          //Coloca o conteudo do arquivo na memoria.
-
-      mapa_lido = (char **)calloc(L, sizeof(char *));
-   
-      for (i = 0; i < L; i++)
+      for (y = 0; y <= L; y++)
       {
-         mapa_lido[i] = (char *)calloc(C, sizeof(char));
+         for (x = 0; x <= C; x++)
+         {
+            mapa[y][x] = ' ';
+         }
       }
-
-      printf("\nMapa Lido:\n");
-      for ( i = 0; i < L; i++)
+      for (l = 0; l <= L; l++)
       {
-         printf("%s \n", mapa_lido[i]); 
+         for (c = 0; c <= C; c++)
+         {
+            mapa[l][c] = getc(mapas);
+         }
       }
+      retorno = 1;
    }
 
-}*/
+   return retorno;
+}
+
+//---------------------
